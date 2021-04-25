@@ -1,29 +1,32 @@
 package com.julie.review.pms.handler;
 
-import java.util.Iterator;
-import com.julie.review.driver.Statement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class ProjectListHandler implements Command {
-
-  Statement stmt;
-
-  public ProjectListHandler(Statement stmt) {
-    this.stmt = stmt;
-  }
 
   @Override
   public void service() throws Exception {
     System.out.println("-------------------------------");
     System.out.println("[프로젝트 목록]");
 
-    Iterator<String> results = stmt.executeQuery("project/selectall");
+    try (Connection con = DriverManager.getConnection(
+        "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
+        PreparedStatement stmt = con.prepareStatement(
+            "select no,title,sdt,edt,leader,team from review_pms_project order by title asc");
+        ResultSet rs = stmt.executeQuery()) {
 
-    while (results.hasNext()) {
-      String[] fields = results.next().split(",");
-
-      System.out.printf("%d) 프로젝트명: %s, 내용: %s, 시작일: %s, 종료일: %s, 조장: %s, 팀원: [%s]\n", 
-          fields[0], fields[1], fields[2], fields[3], fields[4], fields[5], fields[6]);
+      while (rs.next()) {
+        System.out.printf("%d) 프로젝트명: %s, 시작일: %s, 종료일: %s, 조장: %s, 팀원: [%s]\n", 
+            rs.getInt("no"), 
+            rs.getString("title"), 
+            rs.getDate("sdt"), 
+            rs.getDate("edt"), 
+            rs.getString("leader"), 
+            rs.getString("team"));
+      }
     }
-
   }
 }

@@ -1,16 +1,16 @@
 package com.julie.review.pms.handler;
 
-import com.julie.review.driver.Statement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import com.julie.review.pms.domain.Task;
 import com.julie.review.util.Prompt;
 
 public class TaskAddHandler implements Command {
 
-  Statement stmt;
   MemberValidator memberValidator;
 
-  public TaskAddHandler(Statement stmt, MemberValidator memberValidator) {
-    this.stmt = stmt;
+  public TaskAddHandler(MemberValidator memberValidator) {
     this.memberValidator = memberValidator;
   }
 
@@ -18,24 +18,29 @@ public class TaskAddHandler implements Command {
   public void service() throws Exception {
     System.out.println("[작업 등록]");
 
-    Task t = new Task();
-    t.setNo(Prompt.printInt("번호> "));
-    t.setContent(Prompt.printString("작업 내용> "));
-    t.setEndDate(Prompt.printDate("마감일> "));
-    t.setLeader(memberValidator.inputMember("담당자 (취소: 빈 문자열) > "));
-    if (t.getLeader() == null) {
+    Task task = new Task();
+    task.setNo(Prompt.printInt("번호> "));
+    task.setContent(Prompt.printString("작업 내용> "));
+    task.setEndDate(Prompt.printDate("마감일> "));
+    task.setLeader(memberValidator.inputMember("담당자 (취소: 빈 문자열) > "));
+    if (task.getLeader() == null) {
       System.out.println("작업 등록을 취소합니다.");
       return;
     } 
 
-    t.setProgress(Prompt.printInt("진행 상태:\n1. 신규\n2. 진행중\n3. 완료\n> "));
+    task.setProgress(Prompt.printInt("진행 상태:\n1. 신규\n2. 진행중\n3. 완료\n> "));
 
-    stmt.executeUpdate("task/insert", String.format("%s,%s,%s,%s",
-        t.getContent(),
-        t.getEndDate(),
-        t.getLeader(),
-        t.getProgress()));
+    try (Connection con = DriverManager.getConnection(
+        "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
+        PreparedStatement stmt = con.prepareStatement(
+            "insert into review_pms_task(content,edt,leader,progress) values (?,?,?,?)")) {
+      stmt.setString(1, task.getContent());
+      stmt.setDate(2, task.getEndDate());
+      stmt.setString(3, task.getLeader());
+      stmt.setInt(4, task.getProgress());
+      stmt.executeUpdate();
 
-    System.out.println("작업 등록을 완료하였습니다.");
+      System.out.println("작업 등록을 완료하였습니다.");
+    }
   }
 }

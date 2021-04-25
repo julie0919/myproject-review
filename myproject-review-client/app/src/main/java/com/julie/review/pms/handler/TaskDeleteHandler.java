@@ -1,23 +1,17 @@
 package com.julie.review.pms.handler;
 
-import com.julie.review.driver.Statement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import com.julie.review.util.Prompt;
 
 public class TaskDeleteHandler implements Command {
-
-  Statement stmt;
-
-  public TaskDeleteHandler(Statement stmt) {
-    this.stmt = stmt;
-  }
 
   @Override
   public void service() throws Exception {
     System.out.println("[작업 삭제하기]");
 
     int no = Prompt.printInt("번호> ");
-
-    stmt.executeQuery("task/select", Integer.toString(no));
 
     String input = Prompt.printString("작업을 삭제하시겠습니까? (Y/N)");
 
@@ -26,8 +20,17 @@ public class TaskDeleteHandler implements Command {
       return;
     }    
 
-    stmt.executeUpdate("task/delete", Integer.toString(no));
+    try (Connection con = DriverManager.getConnection(
+        "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
+        PreparedStatement stmt = con.prepareStatement(
+            "delete from review_pms_task where no=?")) {
 
-    System.out.println("작업을 삭제하였습니다.");
+      stmt.setInt(1, no);
+      if (stmt.executeUpdate() == 0) {
+        System.out.println("해당 번호의 작업이 없습니다.");
+      } else {
+        System.out.println("작업을 삭제하였습니다.");
+      }
+    }
   }
 }

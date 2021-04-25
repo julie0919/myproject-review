@@ -1,33 +1,39 @@
 package com.julie.review.pms.handler;
 
-import com.julie.review.driver.Statement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import com.julie.review.util.Prompt;
 
 public class MemberValidator {
 
-  Statement stmt;
+  public String inputMember(String promptTitle) throws Exception {
 
-  public MemberValidator(Statement stmt) {
-    this.stmt = stmt;
-  }
+    try (Connection con = DriverManager.getConnection(
+        "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
+        PreparedStatement stmt = con.prepareStatement(
+            "select count(*) from review_pms_member where name=?")) {
 
-  public String inputMember(String promptTitle) {
+      while (true) {
+        String name = Prompt.printString(promptTitle);
+        if (name.length() == 0) {
+          return null;
+        } 
+        stmt.setString(1, name);
 
-    while (true) {
-      String name = Prompt.printString(promptTitle);
-      if (name.length() == 0) {
-        return null;
-      } 
-
-      try {
-        return this.stmt.executeQuery("member/selectByName", name).next().split(",")[1];
-      } catch (Exception e) {
-        System.out.println("등록된 회원이 아닙니다.");
+        try (ResultSet rs = stmt.executeQuery()) {
+          rs.next();
+          if (rs.getInt(1) > 0) {
+            return name;
+          }
+          System.out.println("등록된 회원이 아닙니다.");          
+        }
       }
     }
   }
 
-  public String inputMembers(String promptTitle) {
+  public String inputMembers(String promptTitle) throws Exception {
     String members = "";
     while (true) {
       String name = inputMember(promptTitle);

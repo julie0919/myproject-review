@@ -1,28 +1,38 @@
 package com.julie.review.pms.handler;
 
-import com.julie.review.driver.Statement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import com.julie.review.util.Prompt;
 
 public class ProjectDetailHandler implements Command {
-
-  Statement stmt;
-
-  public ProjectDetailHandler(Statement stmt) {
-    this.stmt = stmt;
-  }
 
   @Override
   public void service() throws Exception {
     System.out.println("[프로젝트 상세보기]");
     int no = Prompt.printInt("번호> ");
 
-    String[] fields = stmt.executeQuery("project/select", Integer.toString(no)).next().split(",");
+    try (Connection con = DriverManager.getConnection(
+        "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
+        PreparedStatement stmt = con.prepareStatement(
+            "select * from review_pms_project where no=?")) {
 
-    System.out.printf("프로젝트명: %s\n", fields[1]);
-    System.out.printf("내용: %s\n", fields[2]);
-    System.out.printf("시작일: %s\n", fields[3]);
-    System.out.printf("종료일: %s\n", fields[4]);
-    System.out.printf("조장: %s\n", fields[5]);
-    System.out.printf("팀원: %s\n", fields[6]);
+      stmt.setInt(1, no);
+
+      try (ResultSet rs = stmt.executeQuery()) {
+        if (!rs.next()) {
+          System.out.println("해당 번호의 프로젝트가 없습니다.");
+          return;
+        }
+
+        System.out.printf("프로젝트명: %s\n", rs.getString("title"));
+        System.out.printf("내용: %s\n", rs.getString("content"));
+        System.out.printf("시작일: %s\n", rs.getDate("sdt"));
+        System.out.printf("종료일: %s\n", rs.getDate("edt"));
+        System.out.printf("조장: %s\n", rs.getString("leader"));
+        System.out.printf("팀원: %s\n", rs.getString("team"));
+      }
+    }
   }
 }

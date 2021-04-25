@@ -1,16 +1,16 @@
 package com.julie.review.pms.handler;
 
-import com.julie.review.driver.Statement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import com.julie.review.pms.domain.Project;
 import com.julie.review.util.Prompt;
 
 public class ProjectAddHandler implements Command {
 
-  Statement stmt;
   MemberValidator memberValidator;
 
-  public ProjectAddHandler(Statement stmt, MemberValidator memberValidator) {
-    this.stmt = stmt;
+  public ProjectAddHandler(MemberValidator memberValidator) {
     this.memberValidator = memberValidator;
   }
 
@@ -30,9 +30,21 @@ public class ProjectAddHandler implements Command {
     } 
     p.setTeam(memberValidator.inputMembers("팀원 (완료: 빈 문자열)> "));
 
-    stmt.executeUpdate("project/insert", String.format("%s,%s,%s,%s,%s,%s",
-        p.getTitle(), p.getContent(), p.getStartDate(), p.getEndDate(), p.getLeader(), p.getTeam()));
+    try (Connection con = DriverManager.getConnection(
+        "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
+        PreparedStatement stmt = con.prepareStatement(
+            "insert into review_pms_project(title,content,sdt,edt,leader,team"
+                + "values(?,?,?,?,?,?")) {
 
-    System.out.println("프로젝트를 등록하였습니다.");
+      stmt.setString(1, p.getTitle());
+      stmt.setString(2, p.getContent());
+      stmt.setDate(3, p.getStartDate());
+      stmt.setDate(4, p.getEndDate());
+      stmt.setString(5, p.getLeader());
+      stmt.setString(6, p.getTeam());
+      stmt.executeUpdate();
+
+      System.out.println("프로젝트를 등록하였습니다.");
+    }
   }
 }

@@ -1,15 +1,12 @@
 package com.julie.review.pms.handler;
 
-import com.julie.review.driver.Statement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import com.julie.review.util.Prompt;
 
 public class MemberDetailHandler implements Command {
-
-  Statement stmt;
-
-  public MemberDetailHandler(Statement stmt) {
-    this.stmt = stmt;
-  }
 
   @Override
   public void service() throws Exception {
@@ -17,10 +14,21 @@ public class MemberDetailHandler implements Command {
 
     int no = Prompt.printInt("번호> ");
 
-    String[] fields = stmt.executeQuery("member/select", Integer.toString(no)).next().split(",");
+    try (Connection con = DriverManager.getConnection(
+        "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
+        PreparedStatement stmt = con.prepareStatement(
+            "select * from review_pms_member where no=?")) {
+      stmt.setInt(1, no);
 
-    System.out.printf("이름: %s\n", fields[1]);
-    System.out.printf("이메일: %s\n", fields[2]);
-    System.out.printf("연락처: %s\n", fields[3]);
+      try (ResultSet rs = stmt.executeQuery()) {
+        if (!rs.next()) {
+          System.out.println("해당 번호의 멤버가 없습니다.");
+          return;
+        }
+        System.out.printf("이름: %s\n", rs.getString("name"));
+        System.out.printf("이메일: %s\n", rs.getString("mail"));
+        System.out.printf("연락처: %s\n", rs.getString("tel"));
+      }
+    }
   }
 }
