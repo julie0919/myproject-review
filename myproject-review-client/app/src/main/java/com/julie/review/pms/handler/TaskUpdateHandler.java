@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import com.julie.review.pms.domain.Member;
 import com.julie.review.pms.domain.Task;
 import com.julie.review.util.Prompt;
 
@@ -23,9 +24,18 @@ public class TaskUpdateHandler implements Command {
     try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
         PreparedStatement stmt1 = con.prepareStatement(
-            "select * from review_pms_task where no=?");
+            "select"
+                + " t.no,"
+                + " t.content,"
+                + " t.deadline,"
+                + " t.progress,"
+                + " m.no as leader_no,"
+                + " m.name as leader_name"
+                + " from review_pms_task t"
+                + " inner join review_pms_member m on t.leader=m.no"
+                + " where t.no=?");
         PreparedStatement stmt2 = con.prepareStatement(
-            "update review_pms_task set content=?,edt=?,leader=?,progress=? where no=?")) {
+            "update review_pms_task set content=?,deadline=?,leader=?,progress=? where no=?")) {
 
       Task task = new Task();
 
@@ -39,15 +49,18 @@ public class TaskUpdateHandler implements Command {
 
         task.setNo(no);
         task.setContent(rs.getString("content"));
-        task.setEndDate(rs.getDate("edt"));
-        task.setLeader(rs.getString("leader"));
+        task.setDeadline(rs.getDate("deadline"));
+        Member leader = new Member();
+        leader.setNo(rs.getInt("leader_no"));
+        leader.setName(rs.getString("leader_name"));
         task.setProgress(rs.getInt("progress"));
       }
 
       // 2) 사용자에게서 변경할 데이터를 입력받는다.
       task.setContent(Prompt.printString(String.format("작업 내용 (%s)> \n", task.getContent())));
-      task.setEndDate(Prompt.printDate(String.format("마감일 (%s)> \n", task.getEndDate())));
-      task.setLeader(memberValidator.inputMember(String.format("조장 (%s) (취소: 빈 문자열)> ", task.getLeader())));
+      task.setDeadline(Prompt.printDate(String.format("마감일 (%s)> \n", task.getDeadline())));
+
+      task.setLeader(memberValidator.inputMember(String.format("조장 (%s) (취소: 빈 문자열)> ", task.getLeader().getName())));
       if (task.getLeader() == null) {
         System.out.println("작업 수정을 취소합니다.");
         return;
@@ -65,11 +78,12 @@ public class TaskUpdateHandler implements Command {
 
       // 3) DBMS에게 게시글 변경을 요청한다.
       stmt2.setString(1, task.getContent());
-      stmt2.setDate(2, task.getEndDate());
-      stmt2.setString(3, task.getLeader());
+      stmt2.setDate(2, task.getDeadline());
+      stmt2.setInt(3, task.getLeader().getNo());
       stmt2.setInt(4, task.getProgress());
       stmt2.setInt(5, task.getNo());
       stmt2.executeUpdate();
+
       System.out.println("작업 정보를 수정하였습니다.");
     }
 

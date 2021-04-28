@@ -22,7 +22,7 @@ public class MemberAddHandler implements Command {
     try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
         PreparedStatement stmt = con.prepareStatement(
-            "insert into review_pms_member(name,mail,tel,pw) values(?,?,?,password(?)")) {
+            "insert into review_pms_member(name,mail,tel,pw) values(?,?,?,password(?))")) {
 
       stmt.setString(1, member.getName());
       stmt.setString(2, member.getMail());

@@ -20,6 +20,7 @@ public class MemberUpdateHandler implements Command {
             "select * from review_pms_member where no=?");
         PreparedStatement stmt2 = con.prepareStatement(
             "update review_pms_member set name=?,mail=?,tel=?,pw=password(?) where no=?")) {
+
       Member member = new Member();
 
       // 1) 기존 데이터 조회
@@ -54,6 +55,7 @@ public class MemberUpdateHandler implements Command {
       stmt2.setString(2, member.getMail());
       stmt2.setString(3, member.getTel());
       stmt2.setString(4, member.getPw());
+      stmt2.setInt(5, member.getNo());
       stmt2.executeUpdate();
 
       System.out.println("멤버 정보를 수정하였습니다.");

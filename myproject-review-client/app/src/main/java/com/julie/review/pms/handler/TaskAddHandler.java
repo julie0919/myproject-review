@@ -21,7 +21,7 @@ public class TaskAddHandler implements Command {
     Task task = new Task();
     task.setNo(Prompt.printInt("번호> "));
     task.setContent(Prompt.printString("작업 내용> "));
-    task.setEndDate(Prompt.printDate("마감일> "));
+    task.setDeadline(Prompt.printDate("마감일> "));
     task.setLeader(memberValidator.inputMember("담당자 (취소: 빈 문자열) > "));
     if (task.getLeader() == null) {
       System.out.println("작업 등록을 취소합니다.");
@@ -33,10 +33,10 @@ public class TaskAddHandler implements Command {
     try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
         PreparedStatement stmt = con.prepareStatement(
-            "insert into review_pms_task(content,edt,leader,progress) values (?,?,?,?)")) {
+            "insert into review_pms_task(content,deadline,leader,progress) values (?,?,?,?)")) {
       stmt.setString(1, task.getContent());
-      stmt.setDate(2, task.getEndDate());
-      stmt.setString(3, task.getLeader());
+      stmt.setDate(2, task.getDeadline());
+      stmt.setInt(3, task.getLeader().getNo());
       stmt.setInt(4, task.getProgress());
       stmt.executeUpdate();
 
