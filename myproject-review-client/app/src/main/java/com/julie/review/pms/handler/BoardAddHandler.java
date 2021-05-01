@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import com.julie.review.pms.domain.Board;
+import com.julie.review.pms.domain.Member;
 import com.julie.review.util.Prompt;
 
 public class BoardAddHandler implements Command {
@@ -16,7 +17,10 @@ public class BoardAddHandler implements Command {
 
     b.setTitle(Prompt.printString("제목> "));
     b.setContent(Prompt.printString("내용> "));
-    b.setWriter(Prompt.printString("작성자> "));
+
+    Member writer = new Member();
+    writer.setNo(Prompt.printInt("작성자 번호> "));
+    b.setWriter(writer);
 
     try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
@@ -24,7 +28,7 @@ public class BoardAddHandler implements Command {
             "insert into review_pms_board(title, content, writer) values(?,?,?)")) {
       stmt.setString(1, b.getTitle());
       stmt.setString(2, b.getContent());
-      stmt.setString(3, b.getWriter());
+      stmt.setInt(3, b.getWriter().getNo());
 
       stmt.executeUpdate();
 

@@ -56,6 +56,7 @@ public class ClientApp {
   }
 
   public void execute() throws Exception {
+
     // 사용자 명령을 처리하는 객체를 맵에 보관한다.
     HashMap<String,Command> commandMap = new HashMap<>();
 
@@ -85,7 +86,6 @@ public class ClientApp {
     commandMap.put("/task/delete", new TaskDeleteHandler());
 
     try {
-
       while (true) {
         String command = Prompt.printString("명령> ");
 

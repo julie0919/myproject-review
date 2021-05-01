@@ -23,7 +23,7 @@ public class ProjectDeleteHandler implements Command {
     try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
         PreparedStatement stmt1 = con.prepareStatement(
-            "delete from review_pms_member_project where no=?");
+            "delete from review_pms_member_project where project_no=?");
         PreparedStatement stmt2 = con.prepareStatement(
             "delete from review_pms_project where no=?")) {
 

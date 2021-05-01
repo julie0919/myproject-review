@@ -37,7 +37,7 @@ public class BoardUpdateHandler implements Command {
         board.setContent(rs.getString("content"));
       }
 
-      // 사용자에게서 변경할 데이터를 입력 받는다.
+      // 2) 사용자에게서 변경할 데이터를 입력 받는다.
       board.setTitle(Prompt.printString(String.format("제목 (%s)> \n", board.getTitle())));
       board.setContent(Prompt.printString(String.format("내용 (%s)> \n", board.getContent())));
 

@@ -23,9 +23,12 @@ public class TaskDetailHandler implements Command {
                 + " t.deadline,"
                 + " t.progress,"
                 + " m.no as leader_no,"
-                + " m.name as leader_name"
+                + " m.name as leader_name,"
+                + " p.no as project_no,"
+                + " p.title as project_title"
                 + " from review_pms_task t"
                 + " inner join review_pms_member m on t.leader=m.no"
+                + " inner join review_pms_project p on t.project_no=p.no"
                 + " where t.no=?")) {
 
       stmt.setInt(1, no);
@@ -35,6 +38,7 @@ public class TaskDetailHandler implements Command {
           System.out.println("해당 번호의 작업이 없습니다.");
           return;
         }
+        System.out.printf("프로젝트: %s\n", rs.getString("project_title"));
         System.out.printf("작업 내용: %s\n", rs.getString("content"));
         System.out.printf("마감일: %s\n", rs.getDate("deadline"));
         System.out.printf("진행상태: %s\n", Task.getStatusLabel(rs.getInt("progress")));

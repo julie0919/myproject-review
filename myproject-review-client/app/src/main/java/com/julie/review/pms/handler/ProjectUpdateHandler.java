@@ -50,7 +50,7 @@ public class ProjectUpdateHandler implements Command {
                 + " content=?,"
                 + " sdt=?,"
                 + " edt=?,"
-                + " leader=?,"
+                + " leader=?"
                 + " where no=?");
         PreparedStatement stmt4 = con.prepareStatement(
             "delete from review_pms_member_project where project_no=?");

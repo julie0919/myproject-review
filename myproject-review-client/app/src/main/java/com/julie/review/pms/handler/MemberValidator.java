@@ -16,7 +16,7 @@ public class MemberValidator {
     try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
         PreparedStatement stmt = con.prepareStatement(
-            "select count(*) from review_pms_member where name=?")) {
+            "select no,name,mail from review_pms_member where name=?")) {
 
       while (true) {
         String name = Prompt.printString(promptTitle);

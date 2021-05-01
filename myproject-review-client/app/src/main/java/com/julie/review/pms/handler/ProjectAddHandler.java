@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import com.julie.review.pms.domain.Member;
 import com.julie.review.pms.domain.Project;
 import com.julie.review.util.Prompt;
@@ -35,7 +36,8 @@ public class ProjectAddHandler implements Command {
     try (Connection con = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/studydb?user=study&password=1111");
         PreparedStatement stmt = con.prepareStatement(
-            "insert into review_pms_project(title,content,sdt,edt,leader) values(?,?,?,?,?");
+            "insert into review_pms_project(title,content,sdt,edt,leader) values(?,?,?,?,?)",
+            Statement.RETURN_GENERATED_KEYS);
         PreparedStatement stmt2 = con.prepareStatement(
             "insert into review_pms_member_project(member_no,project_no) values (?,?)")) {
 

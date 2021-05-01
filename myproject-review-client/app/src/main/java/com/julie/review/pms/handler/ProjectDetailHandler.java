@@ -19,7 +19,7 @@ public class ProjectDetailHandler implements Command {
             "select"
                 + " p.no,"
                 + " p.title,"
-                + " p.content"
+                + " p.content,"
                 + " p.sdt,"
                 + " p.edt,"
                 + " m.no as leader_no,"

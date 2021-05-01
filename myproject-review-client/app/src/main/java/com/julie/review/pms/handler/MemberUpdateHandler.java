@@ -12,6 +12,7 @@ public class MemberUpdateHandler implements Command {
   @Override
   public void service() throws Exception {
     System.out.println("[멤버 수정하기]");
+
     int no = Prompt.printInt("번호> ");
 
     try (Connection con = DriverManager.getConnection(
